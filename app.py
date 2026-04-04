@@ -15,7 +15,7 @@ from google.genai import types
 # ── Configuration ──────────────────────────────────────────────────────────────
 client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
-MODEL_NAME  = "gemini-2.0-flash"
+MODEL_NAME  = "gemini-2.0-flash-lite"
 TEMPERATURE = 0.0   # kept at 0 for reproducibility
 DELAY_SECS  = 30    # pause between demo calls to respect free-tier rate limits
 
