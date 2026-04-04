@@ -3,18 +3,21 @@ SIOP Meeting Action Item Extractor
 -----------------------------------
 Business Workflow : Summarize SIOP meetings into structured action items
 User              : SIOP Master Scheduler
-Model             : Google Gemini via Google AI Studio
+Model             : Google Gemini 2.0 Flash via Google AI Studio
 """
 
 import os
 import json
-import google.generativeai as genai
+import time
+from google import genai
+from google.genai import types
 
 # ── Configuration ──────────────────────────────────────────────────────────────
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
-MODEL_NAME   = "gemini-1.5-flash"
-TEMPERATURE  = 0.0   # kept at 0 for reproducibility
+MODEL_NAME  = "gemini-2.0-flash"
+TEMPERATURE = 0.0   # kept at 0 for reproducibility
+DELAY_SECS  = 30    # pause between demo calls to respect free-tier rate limits
 
 # ── System Prompt ──────────────────────────────────────────────────────────────
 SYSTEM_PROMPT = """
@@ -66,23 +69,23 @@ Transcript:
 {transcript}
 """.strip()
 
-    model = genai.GenerativeModel(
-        model_name=MODEL_NAME,
-        system_instruction=SYSTEM_PROMPT,
-        generation_config=genai.types.GenerationConfig(
+    response = client.models.generate_content(
+        model=MODEL_NAME,
+        contents=user_message,
+        config=types.GenerateContentConfig(
+            system_instruction=SYSTEM_PROMPT,
             temperature=TEMPERATURE,
             response_mime_type="application/json",
         ),
     )
 
-    response = model.generate_content(user_message)
     return json.loads(response.text)
 
 
 # ── Pretty Printer ─────────────────────────────────────────────────────────────
 def print_action_items(action_items: list[dict]) -> None:
     if not action_items:
-        print("\n✅ No action items identified in this meeting.\n")
+        print("\n  No action items identified in this meeting.\n")
         return
 
     print(f"\n{'─'*70}")
@@ -196,7 +199,7 @@ def run_interactive() -> None:
         lines.append(line)
     transcript = "\n".join(lines)
 
-    print("\nProcessing…")
+    print("\nProcessing...")
     items = extract_action_items(meeting_type, attendees, transcript)
     print_action_items(items)
 
@@ -206,8 +209,8 @@ if __name__ == "__main__":
     import sys
 
     if len(sys.argv) > 1 and sys.argv[1] == "--demo":
-        # Run all sample cases for reproducible demo / eval
-        for case in SAMPLE_CASES:
+        # Run all sample cases with a pause between each to respect rate limits
+        for i, case in enumerate(SAMPLE_CASES):
             print(f"\n{'='*70}")
             print(f"  {case['label']}")
             print(f"{'='*70}")
@@ -217,5 +220,10 @@ if __name__ == "__main__":
                 case["transcript"],
             )
             print_action_items(items)
+
+            # Pause between cases (skip after the last one)
+            if i < len(SAMPLE_CASES) - 1:
+                print(f"  Waiting {DELAY_SECS}s before next case to respect rate limits...")
+                time.sleep(DELAY_SECS)
     else:
         run_interactive()
