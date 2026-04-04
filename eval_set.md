@@ -52,9 +52,13 @@ Priya: I'll have a draft ready in two weeks.
 ```
 
 **Actual Output:**
-```
-[To be filled in after running the model]
-```
+
+| Action ID | Owner | Requester | Priority | Context Summary |
+|-----------|-------|-----------|----------|-----------------|
+| ACT-001   |       |           |          |                 |
+| ACT-002   |       |           |          |                 |
+| ACT-003   |       |           |          |                 |
+
 **Score:** [ /5]
 
 ---
@@ -91,9 +95,13 @@ James: Will do, I'll update it by EOD tomorrow.
 ```
 
 **Actual Output:**
-```
-[To be filled in after running the model]
-```
+
+| Action ID | Owner | Requester | Priority | Context Summary |
+|-----------|-------|-----------|----------|-----------------|
+| ACT-001   |       |           |          |                 |
+| ACT-002   |       |           |          |                 |
+| ACT-003   |       |           |          |                 |
+
 **Score:** [ /5]
 
 ---
@@ -126,9 +134,13 @@ Priya: I'll make sure the updated numbers are reflected in the master plan once 
 ```
 
 **Actual Output:**
-```
-[To be filled in after running the model]
-```
+
+| Action ID | Owner | Requester | Priority | Context Summary |
+|-----------|-------|-----------|----------|-----------------|
+| ACT-001   |       |           |          |                 |
+| ACT-002   |       |           |          |                 |
+| ACT-003   |       |           |          |                 |
+
 **Score:** [ /5]
 
 ---
@@ -155,9 +167,11 @@ No action items identified in this meeting. The demand outlook for Q2 is stable,
 ```
 
 **Actual Output:**
-```
-[To be filled in after running the model]
-```
+
+| Action ID | Owner | Requester | Priority | Context Summary |
+|-----------|-------|-----------|----------|-----------------|
+| —         |       |           |          |                 |
+
 **Notes:** The model should gracefully return a "no action items" response rather than hallucinating tasks or forcing a table with empty fields.
 **Score:** [ /5]
 
@@ -199,9 +213,13 @@ Priya: Okay, we'll figure it out offline. Let's move on.
 ```
 
 **Actual Output:**
-```
-[To be filled in after running the model]
-```
+
+| Action ID | Owner | Requester | Priority | Context Summary |
+|-----------|-------|-----------|----------|-----------------|
+| ACT-001   |       |           |          |                 |
+| ACT-002   |       |           |          |                 |
+| ACT-003   |       |           |          |                 |
+
 **Notes:** This is a likely failure case because ownership is never clearly assigned — the model may confidently assign a wrong owner, omit action items entirely, or fail to flag ambiguity. The ideal output acknowledges the ambiguity rather than fabricating definitive owners.
 **Score:** [ /5]
 
