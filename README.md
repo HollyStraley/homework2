@@ -1,7 +1,7 @@
 # Homework 2 - Generative AI
 
 ## Overview
-This project explores prompt engineering and evaluation for a generative AI application focused on automating a real business workflow using the Claude API.
+This project explores prompt engineering and evaluation for a generative AI application focused on automating a real business workflow using the **Google Gemini API (Google AI Studio)**.
 
 ## Business Workflow: Meeting Summarization into Action Items
 
@@ -33,9 +33,36 @@ Manually extracting action items from long SIOP meetings is time-consuming and e
 - `prompts.md` — Prompt templates and design decisions
 - `eval_set.md` — Evaluation dataset with inputs and expected outputs
 - `report.md` — Analysis and findings
+- `requirements.txt` — Python dependencies
 
 ## Setup
+
+### 1. Install dependencies
 ```bash
 pip install -r requirements.txt
+```
+
+### 2. Set your Google AI Studio API key
+```bash
+# Mac/Linux
+export GEMINI_API_KEY="your-api-key-here"
+
+# Windows (Command Prompt)
+set GEMINI_API_KEY=your-api-key-here
+
+# Windows (PowerShell)
+$env:GEMINI_API_KEY="your-api-key-here"
+```
+Get a free API key at [https://aistudio.google.com](https://aistudio.google.com).
+
+### 3. Run the app
+
+**Interactive mode** — enter your own meeting details:
+```bash
 python app.py
+```
+
+**Demo mode** — runs all 3 sample eval cases automatically:
+```bash
+python app.py --demo
 ```
