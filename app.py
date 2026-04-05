@@ -4,23 +4,38 @@ SIOP Meeting Action Item Extractor
 Business Workflow : Summarize SIOP meetings into structured action items
 User              : SIOP Master Scheduler
 Model             : Claude (claude-haiku-4-5) via Anthropic API
+
+Usage
+-----
+  # Run all 5 eval cases and save output to results.txt (default)
+  python app.py --demo
+
+  # Run demo with a custom system prompt from a file
+  python app.py --demo --system-prompt my_prompt.txt
+
+  # Run demo and save output to a custom file
+  python app.py --demo --output my_results.txt
+
+  # Interactive mode — enter your own meeting
+  python app.py
 """
 
 import os
+import sys
 import json
 import time
+import argparse
 import anthropic
 
 # ── Configuration ──────────────────────────────────────────────────────────────
-client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+MODEL_NAME   = "claude-haiku-4-5"
+MAX_TOKENS   = 1024
+TEMPERATURE  = 0.0        # kept at 0 for reproducibility
+DELAY_SECS   = 5          # pause between demo calls
+DEFAULT_OUTPUT_FILE = "results.txt"
 
-MODEL_NAME  = "claude-haiku-4-5"
-MAX_TOKENS  = 1024
-TEMPERATURE = 0.0   # kept at 0 for reproducibility
-DELAY_SECS  = 5     # short pause between demo calls
-
-# ── System Prompt ──────────────────────────────────────────────────────────────
-SYSTEM_PROMPT = """
+# ── Default System Prompt (configurable via --system-prompt flag) ───────────
+DEFAULT_SYSTEM_PROMPT = """
 You are an AI assistant for a SIOP (Sales, Inventory & Operations Planning) Master Scheduler.
 Your job is to read a meeting transcript and extract every action item that was committed to or requested.
 
@@ -42,16 +57,20 @@ Always return valid JSON — a list of action-item objects — with no extra com
 def extract_action_items(
     meeting_type: str,
     attendees: list[str],
-    transcript: str
+    transcript: str,
+    system_prompt: str,
+    client: anthropic.Anthropic
 ) -> list[dict]:
     """
     Send meeting details to Claude and return a list of action-item dicts.
 
     Parameters
     ----------
-    meeting_type : str   e.g. "Demand Review", "Supply Review", "Executive S&OP"
-    attendees    : list  Full names + roles, e.g. ["Sarah Lin (Demand Planner)", ...]
-    transcript   : str   Raw meeting transcript text
+    meeting_type  : str   e.g. "Demand Review", "Supply Review", "Executive S&OP"
+    attendees     : list  Full names + roles, e.g. ["Sarah Lin (Demand Planner)", ...]
+    transcript    : str   Raw meeting transcript text
+    system_prompt : str   The system instruction sent to the model
+    client        : anthropic.Anthropic  Authenticated API client
 
     Returns
     -------
@@ -73,7 +92,7 @@ Transcript:
         model=MODEL_NAME,
         max_tokens=MAX_TOKENS,
         temperature=TEMPERATURE,
-        system=SYSTEM_PROMPT,
+        system=system_prompt,
         messages=[
             {"role": "user", "content": user_message}
         ]
@@ -82,30 +101,37 @@ Transcript:
     # Strip markdown code fences if Claude wraps the JSON in ```json ... ```
     raw = response.content[0].text.strip()
     if raw.startswith("```"):
-        raw = raw.split("```")[1]          # remove opening fence
+        raw = raw.split("```")[1]
         if raw.startswith("json"):
-            raw = raw[4:]                  # remove "json" language tag
+            raw = raw[4:]
     raw = raw.strip()
 
     return json.loads(raw)
 
 
-# ── Pretty Printer ─────────────────────────────────────────────────────────────
-def print_action_items(action_items: list[dict]) -> None:
-    if not action_items:
-        print("\n  No action items identified in this meeting.\n")
-        return
+# ── Formatting Helpers ─────────────────────────────────────────────────────────
+def format_action_items(label: str, action_items: list[dict]) -> str:
+    """Return a formatted string block for a single case."""
+    lines = []
+    lines.append(f"\n{'='*70}")
+    lines.append(f"  {label}")
+    lines.append(f"{'='*70}")
 
-    print(f"\n{'─'*70}")
-    print(f"  {'ACTION ITEMS':^66}")
-    print(f"{'─'*70}")
+    if not action_items:
+        lines.append("\n  No action items identified in this meeting.\n")
+        return "\n".join(lines)
+
+    lines.append(f"\n{'─'*70}")
+    lines.append(f"  {'ACTION ITEMS':^66}")
+    lines.append(f"{'─'*70}")
     for item in action_items:
-        print(f"\n  {item.get('action_id', 'N/A')} | {item.get('priority','?')} Priority")
-        print(f"  Action  : {item.get('action_text','')}")
-        print(f"  Owner   : {item.get('owner','')}")
-        print(f"  Request : {item.get('requester','')}")
-        print(f"  Context : {item.get('context','')}")
-    print(f"\n{'─'*70}\n")
+        lines.append(f"\n  {item.get('action_id', 'N/A')} | {item.get('priority','?')} Priority")
+        lines.append(f"  Action  : {item.get('action_text','')}")
+        lines.append(f"  Owner   : {item.get('owner','')}")
+        lines.append(f"  Request : {item.get('requester','')}")
+        lines.append(f"  Context : {item.get('context','')}")
+    lines.append(f"\n{'─'*70}\n")
+    return "\n".join(lines)
 
 
 # ── Sample Test Cases ──────────────────────────────────────────────────────────
@@ -234,7 +260,7 @@ Priya: Okay, we'll figure it out offline. Let's move on.
 
 
 # ── Interactive Mode ───────────────────────────────────────────────────────────
-def run_interactive() -> None:
+def run_interactive(system_prompt: str, client: anthropic.Anthropic, output_file: str) -> None:
     print("\n=== SIOP Action Item Extractor (Interactive Mode) ===\n")
     meeting_type = input("Meeting type (e.g. Demand Review): ").strip()
     print("Enter attendees one per line. Press Enter twice when done:")
@@ -254,29 +280,90 @@ def run_interactive() -> None:
     transcript = "\n".join(lines)
 
     print("\nProcessing...")
-    items = extract_action_items(meeting_type, attendees, transcript)
-    print_action_items(items)
+    items = extract_action_items(meeting_type, attendees, transcript, system_prompt, client)
+    output = format_action_items("Interactive Session", items)
+    print(output)
+    save_output(output, output_file)
+
+
+# ── File Output ────────────────────────────────────────────────────────────────
+def save_output(content: str, filepath: str) -> None:
+    """Append formatted output to the results file."""
+    with open(filepath, "a", encoding="utf-8") as f:
+        f.write(content)
+    print(f"  [Saved to {filepath}]")
 
 
 # ── Entry Point ────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    import sys
 
-    if len(sys.argv) > 1 and sys.argv[1] == "--demo":
-        # Run all sample cases with a short pause between each
+    # ── Argument Parser ────────────────────────────────────────────────────────
+    parser = argparse.ArgumentParser(
+        description="SIOP Meeting Action Item Extractor"
+    )
+    parser.add_argument(
+        "--demo",
+        action="store_true",
+        help="Run all 5 evaluation cases automatically"
+    )
+    parser.add_argument(
+        "--system-prompt",
+        type=str,
+        default=None,
+        help="Path to a .txt file containing a custom system prompt"
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default=DEFAULT_OUTPUT_FILE,
+        help=f"File to save results to (default: {DEFAULT_OUTPUT_FILE})"
+    )
+    args = parser.parse_args()
+
+    # ── API Key Check ──────────────────────────────────────────────────────────
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        print("\n[ERROR] ANTHROPIC_API_KEY environment variable is not set.")
+        print("  Set it with: set ANTHROPIC_API_KEY=your-key-here  (Windows CMD)")
+        print("  Get a key at: https://console.anthropic.com\n")
+        sys.exit(1)
+
+    client = anthropic.Anthropic(api_key=api_key)
+
+    # ── Load System Prompt ─────────────────────────────────────────────────────
+    if args.system_prompt:
+        with open(args.system_prompt, "r", encoding="utf-8") as f:
+            system_prompt = f.read().strip()
+        print(f"\n[INFO] Using custom system prompt from: {args.system_prompt}")
+    else:
+        system_prompt = DEFAULT_SYSTEM_PROMPT
+
+    # ── Clear output file for a fresh run ─────────────────────────────────────
+    if args.demo:
+        open(args.output, "w").close()
+
+    # ── Demo or Interactive ────────────────────────────────────────────────────
+    if args.demo:
+        print(f"\n[INFO] Model      : {MODEL_NAME}")
+        print(f"[INFO] Temperature: {TEMPERATURE} (reproducible)")
+        print(f"[INFO] Output file: {args.output}")
+
         for i, case in enumerate(SAMPLE_CASES):
-            print(f"\n{'='*70}")
-            print(f"  {case['label']}")
-            print(f"{'='*70}")
             items = extract_action_items(
                 case["meeting_type"],
                 case["attendees"],
                 case["transcript"],
+                system_prompt,
+                client,
             )
-            print_action_items(items)
+            output = format_action_items(case["label"], items)
+            print(output)
+            save_output(output, args.output)
 
             if i < len(SAMPLE_CASES) - 1:
                 print(f"  Waiting {DELAY_SECS}s before next case...")
                 time.sleep(DELAY_SECS)
+
+        print(f"\n[DONE] All cases complete. Results saved to: {args.output}\n")
     else:
-        run_interactive()
+        run_interactive(system_prompt, client, args.output)
