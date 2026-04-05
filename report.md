@@ -68,29 +68,6 @@ The most significant improvements came from adding an explicit output schema (V0
 
 ---
 
-## Analysis
-
-### What Worked Well
-
-**Role + schema = consistent structure.** The single most impactful change across all three prompt versions was adding a domain-specific role and an explicit output schema. Before Version 1, outputs varied in format on every call. After Version 1, all normal cases produced identical structure with correct field names and constrained values. This confirms that explicit output schemas are essential for structured extraction tasks.
-
-**Empty list instruction eliminated hallucination in Case 4.** Without the `"return an empty list []"` instruction, the model invented filler tasks in informational meetings. With it, Case 4 returned a clean empty result every time. This is an example where a single sentence in the prompt directly prevented a meaningful failure.
-
-**Meeting type and attendees improved context.** Adding meeting type and attendees to the user message helped the model correctly infer that all action items in Case 3 (Executive S&OP) were High priority — a judgment call that requires understanding the meeting's organizational significance.
-
-### What Didn't Work
-
-**TBD instruction only partially solved ambiguous ownership.** The `"use 'TBD'"` instruction worked for cases where no owner was mentioned at all (ACT-002, ACT-003 in Case 5), but failed when one name appeared frequently in the context of a disputed task. The model appears to use frequency of association as a proxy for ownership, which is a reasonable heuristic but not correct when the transcript explicitly shows disagreement. A stronger instruction — such as explicitly defining what "ambiguous" means — may be needed in a future revision.
-
-**Priority for Case 3 deviated slightly from expected.** The expected output for Case 3 included one Medium priority item (ACT-003 — updating the master plan). The model returned High for all three, reasoning that master plan updates are time-sensitive in an executive context. This is a defensible interpretation, but it shows that priority inference is subjective and may need more explicit guidance for nuanced cases.
-
-### Limitations
-- The system relies on the transcript being verbatim and reasonably well-formatted. Transcripts with speaker confusion, crosstalk, or heavy domain jargon may degrade output quality.
-- Ownership ambiguity remains a hard problem. No prompt instruction fully resolves cases where multiple people discuss a task without committing. A human review step is still recommended for these cases.
-- The prototype does not handle multi-meeting context — each transcript is processed independently with no memory of prior action items or carryover commitments.
-
----
-
 ## Conclusion
 
 This project demonstrated that a large language model can reliably extract structured action items from SIOP meeting transcripts when given a well-designed prompt, a clear output schema, and targeted instructions for edge cases. Across four of five evaluation cases, the system produced accurate, complete, and consistently formatted output.
