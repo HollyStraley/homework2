@@ -33,7 +33,36 @@ Manually extracting action items from long SIOP meetings is time-consuming and e
 - `prompts.md` — Prompt templates and design decisions
 - `eval_set.md` — Evaluation dataset with inputs and expected outputs
 - `report.md` — Analysis and findings
-- `requirements.txt` — Python dependencies
+
+## Commit History
+
+| Commit | Description |
+|--------|-------------|
+| cbcf9b7 | Add opening summary paragraph to prompts.md |
+| 0153c36 | Condense design decisions into concise bullet points |
+| b1b6a80 | Replace failure conditions paragraph with user's own words |
+| 47b0fee | Replace business use case section with user's own words |
+| 49b31fb | Restructure report with business use case, comparison table, and failure conditions |
+| 34403db | Remove Analysis section from report |
+| fb54594 | Add baseline vs final comparison table and Google AI Studio note to report |
+| 0453b4b | Add complete report.md with introduction, approach, results, analysis, and conclusion |
+| aee8b9f | Add prompt iteration log with V0, V1, V2 and evidence-based improvements |
+| 6f088ed | Add full prompts.md with system prompt, user template, and design decisions |
+| 142d303 | Remove requirements.txt and results.txt |
+| 8f0988a | Add results.txt with demo output for all 5 eval cases |
+| 8deb49a | Meet all grading requirements: configurable prompt, file output, API key check, argparse |
+| b2d701d | Fill in actual outputs for Cases 2 and 3 from demo run |
+| 2ae2baf | Add Cases 2 and 3 to demo sample cases |
+| 9105adb | Fill in actual outputs for Cases 1, 4, and 5 from demo run |
+| a7d8e1a | Fix JSON parsing to strip markdown code fences from Claude response |
+| 157d9b3 | Switch from Google Gemini to Anthropic Claude API |
+| a8d1bbb | Switch to gemini-2.0-flash-lite to avoid free tier quota exhaustion |
+| b5bce33 | Switch to google-genai SDK and add rate limit delay between demo cases |
+| 6ed4bce | Build SIOP action item extractor prototype using Google Gemini API |
+| be85c19 | Simplify actual output sections to owner, requester, priority, and context summary |
+| f9b6f02 | Add evaluation set with 5 representative SIOP meeting test cases |
+| baaeb2d | Update README with SIOP meeting summarization workflow details |
+| 4b15244 | Initial commit: add project files for Homework 2 GenAI |
 
 ## Setup
 
