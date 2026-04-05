@@ -98,9 +98,9 @@ James: Will do, I'll update it by EOD tomorrow.
 
 | Action ID | Owner | Requester | Priority | Context Summary |
 |-----------|-------|-----------|----------|-----------------|
-| ACT-001   |       |           |          |                 |
-| ACT-002   |       |           |          |                 |
-| ACT-003   |       |           |          |                 |
+| ACT-001   | Luis Ortega | James Okafor | High | Chicago DC at 94% utilization with more inbound expected; alternative storage needed to prevent capacity issues |
+| ACT-002   | Dana Cho | James Okafor | High | Extended lead time from Supplier 47 impacts planning cycle; must resolve before next cycle to avoid supply disruptions |
+| ACT-003   | James Okafor | Priya Nair | High | Accurate lead time data critical to prevent planning on outdated information and ensure demand-supply alignment |
 
 **Score:** [ /5]
 
@@ -137,9 +137,9 @@ Priya: I'll make sure the updated numbers are reflected in the master plan once 
 
 | Action ID | Owner | Requester | Priority | Context Summary |
 |-----------|-------|-----------|----------|-----------------|
-| ACT-001   |       |           |          |                 |
-| ACT-002   |       |           |          |                 |
-| ACT-003   |       |           |          |                 |
+| ACT-001   | David Park | Carol Simmons | High | 8,000-unit Q4 shortfall unresolved; funding decision needed immediately to proceed with procurement options |
+| ACT-002   | Marcus Webb | Carol Simmons | High | Bottoms-up forecast not reconciling; top-down number needed to resolve Q4 planning gap |
+| ACT-003   | Priya Nair | Carol Simmons | High | Master plan must reflect final funding decision and revised sales forecast for accurate Q4 planning |
 
 **Score:** [ /5]
 
