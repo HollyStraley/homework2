@@ -138,6 +138,52 @@ Priya: I'll have a draft ready in two weeks.
 """.strip(),
     },
     {
+        "label": "Case 2 — Normal: Supply Review with Multiple Owners",
+        "meeting_type": "Supply Review",
+        "attendees": [
+            "James Okafor (Supply Planner)",
+            "Dana Cho (Procurement Manager)",
+            "Priya Nair (SIOP Master Scheduler)",
+            "Luis Ortega (Warehouse Ops Lead)",
+        ],
+        "transcript": """
+Priya: Let's go through supply constraints for the next two cycles. James, what are we looking at?
+
+James: We have a capacity constraint at the Chicago DC — we're at 94% utilization and expecting more inbound from the East Coast supplier next month. Luis, we need you to identify overflow storage options by the 15th.
+
+Luis: Understood, I'll look into third-party storage options and get back to you.
+
+James: Also, Dana, we had a lead time increase from Supplier 47 — they moved from 6 to 9 weeks. Can you get on a call with them this week and push back? We need that resolved before the next demand cycle.
+
+Dana: I'll reach out to them today and aim to have an answer by Thursday.
+
+Priya: Great. And James, please update the supply plan in the system to reflect the new lead times so we're not planning on stale data.
+
+James: Will do, I'll update it by EOD tomorrow.
+""".strip(),
+    },
+    {
+        "label": "Case 3 — Normal: Executive S&OP Meeting",
+        "meeting_type": "Executive S&OP",
+        "attendees": [
+            "Carol Simmons (VP Supply Chain)",
+            "David Park (CFO)",
+            "Priya Nair (SIOP Master Scheduler)",
+            "Marcus Webb (Sales Director)",
+        ],
+        "transcript": """
+Carol: The consensus plan shows a gap of 8,000 units in Q4 that we haven't resolved. David, we need a decision on whether to approve emergency procurement funding — can you get that approved or denied by end of month?
+
+David: Yes, I'll take it to the exec committee this Thursday and confirm by Friday.
+
+Carol: Marcus, we also need a realistic top-down number from Sales leadership for Q4 — the bottoms-up forecast isn't reconciling. Can you align with your regional managers and bring a revised number to the next exec review?
+
+Marcus: I'll set up alignment sessions this week and have a revised number in two weeks.
+
+Priya: I'll make sure the updated numbers are reflected in the master plan once I hear back from both of you.
+""".strip(),
+    },
+    {
         "label": "Case 4 — Edge: No Explicit Action Items",
         "meeting_type": "Demand Review",
         "attendees": [
