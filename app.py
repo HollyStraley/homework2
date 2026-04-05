@@ -3,21 +3,21 @@ SIOP Meeting Action Item Extractor
 -----------------------------------
 Business Workflow : Summarize SIOP meetings into structured action items
 User              : SIOP Master Scheduler
-Model             : Google Gemini 2.0 Flash via Google AI Studio
+Model             : Claude (claude-haiku-4-5) via Anthropic API
 """
 
 import os
 import json
 import time
-from google import genai
-from google.genai import types
+import anthropic
 
 # ── Configuration ──────────────────────────────────────────────────────────────
-client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
-MODEL_NAME  = "gemini-2.0-flash-lite"
+MODEL_NAME  = "claude-haiku-4-5"
+MAX_TOKENS  = 1024
 TEMPERATURE = 0.0   # kept at 0 for reproducibility
-DELAY_SECS  = 30    # pause between demo calls to respect free-tier rate limits
+DELAY_SECS  = 5     # short pause between demo calls
 
 # ── System Prompt ──────────────────────────────────────────────────────────────
 SYSTEM_PROMPT = """
@@ -45,7 +45,7 @@ def extract_action_items(
     transcript: str
 ) -> list[dict]:
     """
-    Send meeting details to Gemini and return a list of action-item dicts.
+    Send meeting details to Claude and return a list of action-item dicts.
 
     Parameters
     ----------
@@ -69,17 +69,17 @@ Transcript:
 {transcript}
 """.strip()
 
-    response = client.models.generate_content(
+    response = client.messages.create(
         model=MODEL_NAME,
-        contents=user_message,
-        config=types.GenerateContentConfig(
-            system_instruction=SYSTEM_PROMPT,
-            temperature=TEMPERATURE,
-            response_mime_type="application/json",
-        ),
+        max_tokens=MAX_TOKENS,
+        temperature=TEMPERATURE,
+        system=SYSTEM_PROMPT,
+        messages=[
+            {"role": "user", "content": user_message}
+        ]
     )
 
-    return json.loads(response.text)
+    return json.loads(response.content[0].text)
 
 
 # ── Pretty Printer ─────────────────────────────────────────────────────────────
@@ -209,7 +209,7 @@ if __name__ == "__main__":
     import sys
 
     if len(sys.argv) > 1 and sys.argv[1] == "--demo":
-        # Run all sample cases with a pause between each to respect rate limits
+        # Run all sample cases with a short pause between each
         for i, case in enumerate(SAMPLE_CASES):
             print(f"\n{'='*70}")
             print(f"  {case['label']}")
@@ -221,9 +221,8 @@ if __name__ == "__main__":
             )
             print_action_items(items)
 
-            # Pause between cases (skip after the last one)
             if i < len(SAMPLE_CASES) - 1:
-                print(f"  Waiting {DELAY_SECS}s before next case to respect rate limits...")
+                print(f"  Waiting {DELAY_SECS}s before next case...")
                 time.sleep(DELAY_SECS)
     else:
         run_interactive()
