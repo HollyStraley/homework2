@@ -4,9 +4,9 @@
 
 ## 1. Business Use Case
 
-The chosen workflow is summarizing SIOP (Sales, Inventory & Operations Planning) meetings into structured action items for a SIOP Master Scheduler. After each meeting — whether a demand review, supply review, or executive S&OP — the scheduler must manually identify who committed to what, who requested it, how urgent it is, and why it matters. This process is time-consuming, inconsistent across facilitators, and error-prone when done manually from long transcripts or recordings. Partially automating it saves the scheduler significant time, improves clarity by enforcing a consistent output structure, and ensures no follow-ups are missed regardless of who ran the meeting.
+I chose a workflow in summarizing SIOP (Sales, Inventory & Operations Planning) meetings into quick actionable items for the SIOP Master Scheduler (or others in similar roles). In each meeting (specifically FOR meetings), there are many action items that have different urgency needs. In partially automating these notes and organizing them by importance, it could save the Master Scheduler some time.
 
-The model selected for this project is **claude-haiku-4-5** via the Anthropic Claude API. Claude was chosen over other available models for several reasons. First, it performed reliably on structured extraction tasks — returning well-formatted JSON consistently without requiring complex post-processing. Second, it handled edge cases gracefully, correctly returning an empty list when a meeting had no action items rather than hallucinating tasks. Third, the Anthropic API was straightforward to set up and use. This project originally attempted to use Google AI Studio with the Gemini API, but despite creating a new project, enabling the Generative Language API, and generating multiple API keys, the free tier quota was consistently set to 0 and could not be resolved after significant troubleshooting. Switching to the Anthropic Claude API resolved all access issues immediately and the prototype was up and running within minutes.
+As for the chosen model that I used, I initially tried to work with the Google AI Studio and unfortunately couldn't get it working, despite creating a new API key. Instead, I used Anthropic Claude API and was able to resolve things rather quickly and my prototype was up and running shortly after.
 
 ---
 
