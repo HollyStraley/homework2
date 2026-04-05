@@ -142,23 +142,10 @@ Always return valid JSON — a list of action-item objects — with no extra com
 
 ## Design Decisions
 
-### 1. Role Assignment in System Prompt
-The system prompt opens with a specific role: *"You are an AI assistant for a SIOP Master Scheduler."* This grounds the model in the business context and reduces the chance of generic responses. By naming the domain (SIOP), the model understands that terms like "demand cycle," "safety stock," and "supply plan" have precise meanings and should be treated accordingly.
-
-### 2. Explicit Output Schema
-Rather than asking the model to "summarize action items," the prompt defines exactly six fields with names, types, and constraints (e.g., priority must be "High", "Medium", or "Low"). This enforces consistency across all meeting types and makes the output machine-readable without post-processing guesswork.
-
-### 3. Structured JSON Output
-Requesting JSON output instead of free text allows the app to parse, display, and eventually store results programmatically. The system prompt instructs the model to return *only* JSON with no extra commentary, which reduces parsing failures. A code fence stripper was added to handle cases where the model wraps JSON in markdown code blocks.
-
-### 4. TBD for Ambiguous Ownership
-The instruction *"use 'TBD' if ownership was never clearly assigned"* was added specifically to handle Case 5 (ambiguous ownership). Without this instruction, the model tends to confidently assign an owner even when the transcript shows disputed responsibility — a known failure mode for LLMs on ownership ambiguity.
-
-### 5. Empty List for No Action Items
-The instruction *"If no action items are found, return an empty list []"* handles the edge case where a meeting is purely informational (Case 4). This prevents the model from hallucinating tasks to fill the output and ensures the app can gracefully display "No action items identified."
-
-### 6. Temperature Set to 0
-`temperature=0.0` is used throughout to ensure deterministic, reproducible outputs. This is important for evaluation — running the same transcript twice should produce the same result, making it easier to compare outputs across prompt iterations.
-
-### 7. Meeting Type and Attendees as Context
-Including the meeting type and full attendees list in the user message (not just the transcript) gives the model additional signal for inferring ownership and priority. For example, knowing the meeting is an "Executive S&OP" helps the model recognize that action items carry higher urgency than a routine demand check-in.
+- **Role assignment** — Giving the model a specific SIOP role grounds it in the business context and reduces generic responses.
+- **Explicit output schema** — Defining all six fields with constraints (e.g. priority must be "High", "Medium", or "Low") enforces consistency and makes output machine-readable.
+- **JSON output** — Requesting JSON instead of free text allows the app to parse and display results reliably. A code fence stripper handles cases where the model wraps the JSON in markdown blocks.
+- **TBD for ambiguous ownership** — Without this instruction the model confidently assigns wrong owners; "TBD" signals to the reviewer that human confirmation is needed.
+- **Empty list for no action items** — Prevents the model from hallucinating tasks when a meeting is purely informational.
+- **Temperature set to 0** — Ensures deterministic, reproducible outputs so the same transcript always returns the same result.
+- **Meeting type and attendees as context** — Giving the model this additional input helps it infer priority and ownership more accurately, especially for executive-level meetings.
