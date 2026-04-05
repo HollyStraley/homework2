@@ -4,6 +4,8 @@
 **User:** SIOP Master Scheduler
 **Model:** claude-haiku-4-5 via Anthropic API
 
+Across the revisions, the biggest things that changed was defining the outputs more (example low, medium, high priority) and implementing a 'TBD' for ownership when the prototype isn't sure who it belongs to and ultimately flags for human review. These changes enforces consistency and accuracy so the wrong human isn't assigned to the wrong task.
+
 ---
 
 ## Prompt Iteration Log
