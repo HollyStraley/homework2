@@ -50,6 +50,24 @@ In Case 5, the model correctly used "TBD" for two of the three ambiguous action 
 
 ---
 
+## Baseline vs. Final Design Comparison
+
+The table below shows how the prompt evolved from the initial draft to the final version and the measurable impact on output quality across the evaluation set.
+
+| Dimension | Version 0 (Baseline) | Version 2 (Final) |
+|---|---|---|
+| **Role** | Generic "helpful assistant" | SIOP Master Scheduler domain role |
+| **Output format** | Unstructured — prose, bullets, or lists | Consistent JSON with 6 required fields |
+| **Priority values** | Unconstrained — "Urgent", "Critical", "Normal" | Constrained to "High", "Medium", or "Low" |
+| **No-action meetings** | Hallucinated filler tasks | Correctly returns empty list |
+| **Ambiguous ownership** | Confidently assigned wrong owner | Correctly uses "TBD" for 2 of 3 ambiguous cases |
+| **User message context** | Transcript only | Meeting type + attendees + transcript |
+| **Cases passing** | 0 / 5 | 4 / 5 (1 partial) |
+
+The most significant improvements came from adding an explicit output schema (V0 → V1), which alone moved the system from 0 passing cases to 3, and from adding targeted edge case instructions (V1 → V2), which resolved the no-action hallucination and partially resolved ambiguous ownership.
+
+---
+
 ## Analysis
 
 ### What Worked Well
@@ -80,3 +98,5 @@ This project demonstrated that a large language model can reliably extract struc
 The most important lesson from this project is that **prompt engineering is an empirical process**. The final prompt was not written correctly on the first attempt — it required two rounds of revision driven by direct evidence from the evaluation set. Each revision addressed a specific, observed failure rather than a hypothetical one. This evidence-based approach produced measurable improvements: Version 0 produced unstructured, inconsistent output; Version 2 passed 4 out of 5 cases with structured, parseable JSON every time.
 
 The remaining failure — ambiguous ownership in Case 5 — reflects a fundamental limitation of extracting commitments from conversational text. Partially automating this workflow is appropriate: the model handles clear cases confidently and flags ambiguity where possible, but a human reviewer should validate ownership before distributing action items to stakeholders.
+
+On a practical note, this project originally attempted to use Google AI Studio with the Gemini API. Despite creating a new project, enabling the Generative Language API, and generating multiple API keys, the free tier quota was consistently set to 0 and could not be resolved. After significant troubleshooting, the decision was made to switch to the Anthropic Claude API, which worked reliably on the first attempt. The transition required minimal code changes and the Claude API proved to be straightforward to set up and use throughout the rest of the project.
