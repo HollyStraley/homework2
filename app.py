@@ -79,7 +79,15 @@ Transcript:
         ]
     )
 
-    return json.loads(response.content[0].text)
+    # Strip markdown code fences if Claude wraps the JSON in ```json ... ```
+    raw = response.content[0].text.strip()
+    if raw.startswith("```"):
+        raw = raw.split("```")[1]          # remove opening fence
+        if raw.startswith("json"):
+            raw = raw[4:]                  # remove "json" language tag
+    raw = raw.strip()
+
+    return json.loads(raw)
 
 
 # ── Pretty Printer ─────────────────────────────────────────────────────────────
