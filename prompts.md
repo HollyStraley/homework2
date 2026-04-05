@@ -6,10 +6,76 @@
 
 ---
 
-## System Prompt
+## Prompt Iteration Log
 
-This is the system instruction sent to the model before every request. It establishes the model's role, defines the exact output schema, and sets boundaries for what to do when no action items exist.
+The system prompt went through three versions. Each revision was driven by specific evidence observed in the model's outputs against the evaluation set.
 
+---
+
+### Version 0 — Initial Draft
+
+**System Prompt:**
+```
+You are a helpful assistant. Read the following meeting transcript and summarize the action items.
+```
+
+**User Message:**
+```
+Transcript:
+{transcript}
+```
+
+**What changed and why:**
+This was the simplest possible starting point — a generic role and a single instruction with no output format defined. It was tested first to establish a baseline and understand where the model would fail without guidance.
+
+**What we observed:**
+- Output format was completely inconsistent: some responses used bullet points, others used numbered lists, others wrote full paragraphs
+- Priority values varied with no constraint — the model used "Urgent", "Critical", "Normal", and "Low" interchangeably across cases
+- Ownership was assigned confidently even in Case 5 where it was disputed, with no indication of ambiguity
+- In Case 4 (no action items), the model invented vague placeholder tasks like "Team to reconvene next cycle" rather than returning nothing
+- No requester or context fields were included since they were never asked for
+
+---
+
+### Version 1 — Added Role, Schema, and JSON Output
+
+**System Prompt:**
+```
+You are an AI assistant for a SIOP (Sales, Inventory & Operations Planning) Master Scheduler.
+Your job is to read a meeting transcript and extract every action item that was committed to or requested.
+
+For each action item return a JSON object with exactly these fields:
+  - action_id   : sequential string, e.g. "ACT-001"
+  - action_text : concise, specific description of the task (1-2 sentences)
+  - owner       : full name of the person responsible for completing the action
+  - requester   : full name of the person who requested or triggered the action
+  - priority    : one of "High", "Medium", or "Low"
+  - context     : 1-2 sentence explanation of why this action matters
+
+Always return valid JSON — a list of action-item objects — with no extra commentary.
+```
+
+**User Message:**
+```
+Transcript:
+{transcript}
+```
+
+**What changed and why:**
+Three things were added based on Version 0 failures: (1) a specific domain role to ground the model in SIOP context, (2) an explicit six-field output schema so every response had the same structure, and (3) a constrained priority field with only three allowed values to eliminate inconsistent labels.
+
+**What improved, stayed the same, or got worse:**
+- ✅ Output format became fully consistent across all normal cases — JSON parsed correctly every time
+- ✅ Priority values were now always "High", "Medium", or "Low" with no variation
+- ✅ Cases 1, 2, and 3 produced accurate, well-structured action items
+- ⚠️ Case 4 (no action items) still caused issues — without guidance, the model returned an empty JSON object `{}` instead of a valid empty list, breaking the parser
+- ⚠️ Case 5 (ambiguous ownership) still failed — the model confidently assigned James Okafor as owner for ACT-001 despite ownership being openly disputed in the transcript
+
+---
+
+### Version 2 — Final Prompt (Added Edge Case Handling and Context Inputs)
+
+**System Prompt:**
 ```
 You are an AI assistant for a SIOP (Sales, Inventory & Operations Planning) Master Scheduler.
 Your job is to read a meeting transcript and extract every action item that was committed to or requested.
@@ -28,12 +94,7 @@ If no action items are found, return an empty list [].
 Always return valid JSON — a list of action-item objects — with no extra commentary.
 ```
 
----
-
-## User Message Template
-
-This is the structure of the message sent to the model for each meeting. The three variables — `{meeting_type}`, `{attendees}`, and `{transcript}` — are populated at runtime.
-
+**User Message:**
 ```
 Meeting Type : {meeting_type}
 
@@ -46,18 +107,35 @@ Transcript:
 {transcript}
 ```
 
-**Example populated input (Case 1):**
+**What changed and why:**
+Two instructions were added to the system prompt: `"use 'TBD' if ownership was never clearly assigned"` to address the ambiguous ownership failure in Case 5, and `"If no action items are found, return an empty list []"` to fix the parser crash in Case 4. The user message was also expanded to include meeting type and attendees list, giving the model additional context to infer priority and ownership more accurately.
+
+**What improved, stayed the same, or got worse:**
+- ✅ Case 4 now correctly returns an empty list and the app displays "No action items identified" without hallucinating tasks
+- ✅ Case 5 improved partially — ACT-002 and ACT-003 now correctly use "TBD" where ownership was unclear
+- ⚠️ Case 5 ACT-001 still assigns James Okafor as owner — this remains the confirmed failure case, as the model resolves ambiguity by picking the most referenced name rather than flagging the dispute
+- ✅ Cases 1, 2, and 3 remained accurate and consistent with the previous version
+
+---
+
+## Final System Prompt (Version 2)
+
 ```
-Meeting Type : Demand Review
+You are an AI assistant for a SIOP (Sales, Inventory & Operations Planning) Master Scheduler.
+Your job is to read a meeting transcript and extract every action item that was committed to or requested.
 
-Attendees:
-  - Sarah Lin (Demand Planner)
-  - Marcus Webb (Sales Director)
-  - Priya Nair (SIOP Master Scheduler)
-  - Tom Reyes (Finance Lead)
+For each action item return a JSON object with exactly these fields:
+  - action_id   : sequential string, e.g. "ACT-001"
+  - action_text : concise, specific description of the task (1-2 sentences)
+  - owner       : full name of the person responsible for completing the action
+                  (use "TBD" if ownership was never clearly assigned)
+  - requester   : full name of the person who requested or triggered the action
+  - priority    : one of "High", "Medium", or "Low"
+  - context     : 1-2 sentence explanation of why this action matters
 
-Transcript:
-Priya: Alright, let's get started with the demand review...
+If no action items are found, return an empty list [].
+
+Always return valid JSON — a list of action-item objects — with no extra commentary.
 ```
 
 ---
@@ -84,14 +162,3 @@ The instruction *"If no action items are found, return an empty list []"* handle
 
 ### 7. Meeting Type and Attendees as Context
 Including the meeting type and full attendees list in the user message (not just the transcript) gives the model additional signal for inferring ownership and priority. For example, knowing the meeting is an "Executive S&OP" helps the model recognize that action items carry higher urgency than a routine demand check-in.
-
----
-
-## What Was Tried and What Didn't Work
-
-| Approach | Result |
-|---|---|
-| No schema defined — asked for "a summary of action items" | Output format was inconsistent; some responses used bullet points, others used prose |
-| Asked for priority without defining valid values | Model used values like "Urgent", "Critical", "Normal" — inconsistent across cases |
-| No TBD instruction for ambiguous ownership | Model confidently assigned wrong owners in Case 5 (confirmed failure) |
-| No empty list instruction for no-action meetings | Model invented placeholder tasks in Case 4 on early iterations |
