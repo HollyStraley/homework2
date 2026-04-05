@@ -55,9 +55,9 @@ Priya: I'll have a draft ready in two weeks.
 
 | Action ID | Owner | Requester | Priority | Context Summary |
 |-----------|-------|-----------|----------|-----------------|
-| ACT-001   |       |           |          |                 |
-| ACT-002   |       |           |          |                 |
-| ACT-003   |       |           |          |                 |
+| ACT-001   | Marcus Webb | Sarah Lin | High | Needed by end of week to update demand forecast for Product Line A, which is experiencing a 12% Q3 spike |
+| ACT-002   | Tom Reyes | Priya Nair | High | 12% demand increase may require additional procurement spending; budget impact must be assessed |
+| ACT-003   | Priya Nair | Sarah Lin | Medium | Revised safety stock policy needed to align inventory strategy with increased demand volatility before next cycle |
 
 **Score:** [ /5]
 
@@ -168,9 +168,7 @@ No action items identified in this meeting. The demand outlook for Q2 is stable,
 
 **Actual Output:**
 
-| Action ID | Owner | Requester | Priority | Context Summary |
-|-----------|-------|-----------|----------|-----------------|
-| —         |       |           |          |                 |
+No action items identified in this meeting. ✅
 
 **Notes:** The model should gracefully return a "no action items" response rather than hallucinating tasks or forcing a table with empty fields.
 **Score:** [ /5]
@@ -216,9 +214,9 @@ Priya: Okay, we'll figure it out offline. Let's move on.
 
 | Action ID | Owner | Requester | Priority | Context Summary |
 |-----------|-------|-----------|----------|-----------------|
-| ACT-001   |       |           |          |                 |
-| ACT-002   |       |           |          |                 |
-| ACT-003   |       |           |          |                 |
+| ACT-001   | James Okafor ⚠️ | Priya Nair | High | Delays recurring for three weeks; root cause investigation essential to resolving supply chain issue |
+| ACT-002   | TBD | James Okafor | High | Decision pending for extended period; needed to mitigate ongoing inbound delays and ensure supply continuity |
+| ACT-003   | TBD | Rachel Moore | Medium | Tracking board needs to be current for inbound visibility; access and ownership need clarification |
 
 **Notes:** This is a likely failure case because ownership is never clearly assigned — the model may confidently assign a wrong owner, omit action items entirely, or fail to flag ambiguity. The ideal output acknowledges the ambiguity rather than fabricating definitive owners.
 **Score:** [ /5]
