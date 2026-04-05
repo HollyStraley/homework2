@@ -1,5 +1,7 @@
 # Homework 2 - Generative AI
 
+[https://www.youtube.com/channel/UCtEsf8bLE9IcRMv8LOFllUA](https://www.youtube.com/channel/UCtEsf8bLE9IcRMv8LOFllUA)
+
 ## Overview
 This project explores prompt engineering and evaluation for a generative AI application focused on automating a real business workflow using the **Anthropic Claude API**.
 
